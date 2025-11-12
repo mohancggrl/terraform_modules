@@ -1,6 +1,11 @@
 # -------------------------------------------------------------------
 # VPC Core Settings
 # -------------------------------------------------------------------
+variable "enable_vpc" {
+  description = "Deploy VPC module?"
+  type        = bool
+}
+
 variable "name" {
   description = "Base name prefix for all resources"
   type        = string
@@ -79,4 +84,21 @@ variable "tags" {
   description = "Common tags applied to all resources"
   type        = map(string)
   default     = {}
+}
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+variable "vpc_id" {
+  description = "VPC ID"
+  type        = string
+
+}
+
+variable "subnet_id" {
+  description = "subnet ID"
+  type        = string
+}
+
+variable "sg_id" {
+  description = "sg ID"
+  type        = string
 }

@@ -1,4 +1,5 @@
 module "vpc" {
+  count = var.enable_vpc ? 1 : 0
   source = "./modules/vpc"
   name                       = var.name
   vpc_cidr                   = var.vpc_cidr
@@ -15,10 +16,11 @@ module "vpc" {
 }
 ###########################################################################
 module "security_group" {
+  count = var.enable_sg ? 1 : 0
   source = "./modules/sg"
   name                  = var.sg_name
   description           = var.sg_description
-  vpc_id                = module.vpc.vpc_id
+  vpc_id                = var.enable_vpc ? module.vpc[0].vpc_id : var.vpc_id
   create_security_group = var.create_security_group
   ingress_rules         = var.sg_ingress_rules
   egress_rules          = var.sg_egress_rules
@@ -26,12 +28,13 @@ module "security_group" {
 }
 ###########################################################################
 module "jenkins" {
+  count = var.enable_jenkins ? 1 : 0
   source = "./modules/ec2"
   name                = var.jenkins_name
   ami                 = var.jenkins_ami
   instance_type       = var.jenkins_instance_type
-  subnet_id           = module.vpc.public_subnet_ids[0]
-  security_group_ids  = [module.security_group.security_group_id]
+  subnet_id           = var.enable_vpc ? module.vpc[0].public_subnet_ids[0] : var.subnet_id
+  security_group_ids  = var.enable_sg ? [module.security_group[0].security_group_id] : [var.sg_id]
   key_name            = var.key_name
   associate_public_ip = var.associate_public_ip
   user_data_template  = "${path.module}/scripts/jenkins.sh.tpl"
@@ -45,12 +48,13 @@ module "jenkins" {
 
 ###########################################################################
 module "agent" {
+  count = var.enable_agent ? 1 : 0
   source = "./modules/ec2"
   name                = var.agent_name
   ami                 = var.agent_ami
   instance_type       = var.agent_instance_type
-  subnet_id           = module.vpc.public_subnet_ids[0]
-  security_group_ids  = [module.security_group.security_group_id]
+  subnet_id           = var.enable_vpc ? module.vpc[0].public_subnet_ids[0] : var.subnet_id
+  security_group_ids  = var.enable_sg ? [module.security_group[0].security_group_id] : [var.sg_id]
   key_name            = var.key_name
   associate_public_ip = var.associate_public_ip
   user_data_template  = "${path.module}/scripts/agent.sh.tpl"
@@ -59,5 +63,43 @@ module "agent" {
     ssh_public_key    = var.agent_ssh_public_key
     server_hostname   = var.agent_server_hostname
   }
+  tags                = var.tags
+}
+###########################################################################
+module "sonar" {
+  count = var.enable_sonar ? 1 : 0
+  source = "./modules/ec2"
+  name                = var.sonar_name
+  ami                 = var.sonar_ami
+  instance_type       = var.sonar_instance_type
+  subnet_id           = var.enable_vpc ? module.vpc[0].public_subnet_ids[0] : var.subnet_id
+  security_group_ids  = var.enable_sg ? [module.security_group[0].security_group_id] : [var.sg_id]
+  key_name            = var.key_name
+  associate_public_ip = var.associate_public_ip
+  user_data_template  = "${path.module}/scripts/sonar.sh.tpl"
+  user_data_vars      = {
+    server_username   = var.sonar_server_username
+    ssh_public_key    = var.sonar_ssh_public_key
+    server_hostname   = var.sonar_server_hostname
+    sonar_db = var.sonar_db
+    sonar_db_user = var.sonar_db_user
+    sonar_db_pass = var.sonar_db_pass
+    pg_super_pass = var.pg_super_pass
+  }
+  tags                = var.tags
+}
+###########################################################################
+module "normal" {
+  count = var.enable_normal ? 1 : 0
+  source = "./modules/ec2"
+  name                = var.sonar_name
+  ami                 = var.sonar_ami
+  instance_type       = var.sonar_instance_type
+  subnet_id           = var.enable_vpc ? module.vpc[0].public_subnet_ids[0] : var.subnet_id
+  security_group_ids  = var.enable_sg ? [module.security_group[0].security_group_id] : [var.sg_id]
+  key_name            = var.key_name
+  associate_public_ip = var.associate_public_ip
+  user_data_template  = ""
+  user_data_vars      = {}
   tags                = var.tags
 }

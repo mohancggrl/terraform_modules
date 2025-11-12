@@ -1,6 +1,11 @@
 # -------------------------------------------------------------------
 # Security Group Variables
 # -------------------------------------------------------------------
+variable "enable_sg" {
+  description = "Deploy Security Group module?"
+  type        = bool
+}
+
 variable "create_security_group" {
   description = "Whether to create the security group"
   type        = bool

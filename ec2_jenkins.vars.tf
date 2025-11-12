@@ -1,6 +1,10 @@
 # -------------------------------------------------------------------
 # EC2 Jenkins Instance Configuration
 # -------------------------------------------------------------------
+variable "enable_agent" {
+  description = "Deploy SonarQube EC2 module?"
+  type        = bool
+}
 
 variable "jenkins_name" {
   description = "Name tag for the Jenkins EC2 instance"
