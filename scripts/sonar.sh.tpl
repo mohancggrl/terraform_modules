@@ -6,9 +6,9 @@ exec > >(tee /var/log/user-data.log | logger -t user-data -s 2>/dev/console) 2>&
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # VARIABLES (Terraform injected)
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-userName="${server_username}"
-ssh_key="${ssh_public_key}"
-hostname="${server_hostname}"
+userName="${sonar_server_username}"
+ssh_key="${sonar_ssh_public_key}"
+hostname="${sonar_server_hostname}"
 
 SONAR_VERSION="9.9.4.87374"
 SONAR_DB="${sonar_db}"

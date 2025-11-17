@@ -89,6 +89,48 @@ module "sonar" {
   tags                = var.tags
 }
 ###########################################################################
+module "jfrog" {
+  count = var.enable_jfrog ? 1 : 0
+  source = "./modules/ec2"
+  name                = var.jfrog_name
+  ami                 = var.jfrog_ami
+  instance_type       = var.jfrog_instance_type
+  subnet_id           = var.enable_vpc ? module.vpc[0].public_subnet_ids[0] : var.subnet_id
+  security_group_ids  = var.enable_sg ? [module.security_group[0].security_group_id] : [var.sg_id]
+  key_name            = var.key_name
+  associate_public_ip = var.associate_public_ip
+  user_data_template  = "${path.module}/scripts/jfrog.sh.tpl"
+  user_data_vars      = {
+    server_username   = var.jfrog_server_username
+    ssh_public_key    = var.jfrog_ssh_public_key
+    server_hostname   = var.jfrog_server_hostname
+    jfrog_db = var.jfrog_db
+    jfrog_db_user = var.jfrog_db_user
+    jfrog_db_pass = var.jfrog_db_pass
+    jfrog_pg_super_pass = var.jfrog_pg_super_pass
+  }
+  tags                = var.tags
+}
+###########################################################################
+module "vault" {
+  count = var.enable_vault ? 1 : 0
+  source = "./modules/ec2"
+  name                = var.vault_name
+  ami                 = var.vault_ami
+  instance_type       = var.vault_instance_type
+  subnet_id           = var.enable_vpc ? module.vpc[0].public_subnet_ids[0] : var.subnet_id
+  security_group_ids  = var.enable_sg ? [module.security_group[0].security_group_id] : [var.sg_id]
+  key_name            = var.key_name
+  associate_public_ip = var.associate_public_ip
+  user_data_template  = "${path.module}/scripts/vault.sh.tpl"
+  user_data_vars      = {
+    vault_server_username   = var.vault_server_username
+    vault_ssh_public_key   = var.vault_ssh_public_key
+    vault_server_hostname   = var.vault_server_hostname
+  }
+  tags                = var.tags
+}
+###########################################################################
 module "normal" {
   count = var.enable_normal ? 1 : 0
   source = "./modules/ec2"
