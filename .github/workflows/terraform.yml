@@ -99,9 +99,10 @@ on:
         options: ["true", "false"]
         default: "true"
 
+
 jobs:
   terraform-plan:
-    if: github.event.inputs.action_type == 'plan-apply'
+    if: ${{ github.event.inputs.action_type == 'plan-apply' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -118,11 +119,11 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init (S3 backend only)
+      - name: Terraform Init
         run: |
           terraform init \
             -backend-config="bucket=${{ github.event.inputs.naitkiterraformbackend }}" \
-            -backend-config="key=${{ github.event.inputs.action_type }}/terraform.tfstate" \
+            -backend-config="key=${{ job.environment.name }}/terraform.tfstate" \
             -backend-config="region=${{ github.event.inputs.aws_region }}" \
             -backend-config="encrypt=true"
 
@@ -141,8 +142,9 @@ jobs:
             -var="enable_eks=${{ github.event.inputs.enable_eks }}" \
             -var="enable_alb_iam_role=${{ github.event.inputs.enable_alb_iam_role }}" || true
 
+
   terraform-apply:
-    if: github.event.inputs.action_type == 'plan-apply'
+    if: ${{ github.event.inputs.action_type == 'plan-apply' }}
     needs: terraform-plan
     runs-on: ubuntu-latest
     environment:
@@ -162,11 +164,11 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init (S3 backend only)
+      - name: Terraform Init
         run: |
           terraform init \
             -backend-config="bucket=${{ github.event.inputs.naitkiterraformbackend }}" \
-            -backend-config="key=${{ github.event.inputs.action_type }}/terraform.tfstate" \
+            -backend-config="key=${{ job.environment.name }}/terraform.tfstate" \
             -backend-config="region=${{ github.event.inputs.aws_region }}" \
             -backend-config="encrypt=true"
 
@@ -185,8 +187,9 @@ jobs:
             -var="enable_eks=${{ github.event.inputs.enable_eks }}" \
             -var="enable_alb_iam_role=${{ github.event.inputs.enable_alb_iam_role }}"
 
+
   terraform-destroy:
-    if: github.event.inputs.action_type == 'destroy'
+    if: ${{ github.event.inputs.action_type == 'destroy' }}
     runs-on: ubuntu-latest
     environment:
       name: dev   # Approval before destroy
@@ -205,11 +208,11 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init (S3 backend only)
+      - name: Terraform Init
         run: |
           terraform init \
             -backend-config="bucket=${{ github.event.inputs.naitkiterraformbackend }}" \
-            -backend-config="key=${{ github.event.inputs.action_type }}/terraform.tfstate" \
+            -backend-config="key=${{ job.environment.name }}/terraform.tfstate" \
             -backend-config="region=${{ github.event.inputs.aws_region }}" \
             -backend-config="encrypt=true"
 
