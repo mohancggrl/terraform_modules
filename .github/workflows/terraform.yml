@@ -118,13 +118,12 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init (with backend)
+      - name: Terraform Init (S3 backend only)
         run: |
           terraform init \
             -backend-config="bucket=${{ github.event.inputs.naitkiterraformbackend }}" \
-            -backend-config="key=state/terraform.tfstate" \
+            -backend-config="key=${{ github.event.inputs.action_type }}/terraform.tfstate" \
             -backend-config="region=${{ github.event.inputs.aws_region }}" \
-            -backend-config="dynamodb_table=terraform-lock-table" \
             -backend-config="encrypt=true"
 
       - name: Terraform Plan
@@ -147,7 +146,7 @@ jobs:
     needs: terraform-plan
     runs-on: ubuntu-latest
     environment:
-      name: dev   # 🔹 Environment now changed to dev
+      name: dev   # Approval before apply
 
     steps:
       - name: Checkout Repo
@@ -163,13 +162,12 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init (with backend)
+      - name: Terraform Init (S3 backend only)
         run: |
           terraform init \
             -backend-config="bucket=${{ github.event.inputs.naitkiterraformbackend }}" \
-            -backend-config="key=state/terraform.tfstate" \
+            -backend-config="key=${{ github.event.inputs.action_type }}/terraform.tfstate" \
             -backend-config="region=${{ github.event.inputs.aws_region }}" \
-            -backend-config="dynamodb_table=terraform-lock-table" \
             -backend-config="encrypt=true"
 
       - name: Terraform Apply
@@ -191,7 +189,7 @@ jobs:
     if: github.event.inputs.action_type == 'destroy'
     runs-on: ubuntu-latest
     environment:
-      name: dev   # 🔹 Environment changed to dev
+      name: dev   # Approval before destroy
 
     steps:
       - name: Checkout Repo
@@ -207,13 +205,12 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init (with backend)
+      - name: Terraform Init (S3 backend only)
         run: |
           terraform init \
             -backend-config="bucket=${{ github.event.inputs.naitkiterraformbackend }}" \
-            -backend-config="key=state/terraform.tfstate" \
+            -backend-config="key=${{ github.event.inputs.action_type }}/terraform.tfstate" \
             -backend-config="region=${{ github.event.inputs.aws_region }}" \
-            -backend-config="dynamodb_table=terraform-lock-table" \
             -backend-config="encrypt=true"
 
       - name: Terraform Destroy
