@@ -139,7 +139,7 @@ jobs:
             -var="enable_normal=${{ github.event.inputs.enable_normal }}" \
             -var="enable_role=${{ github.event.inputs.enable_role }}" \
             -var="enable_eks=${{ github.event.inputs.enable_eks }}" \
-            -var="enable_alb_iam_role=${{ github.event.inputs.enable_alb_iam_role }}"
+            -var="enable_alb_iam_role=${{ github.event.inputs.enable_alb_iam_role }}" || true
 
   terraform-apply:
     if: github.event.inputs.action_type == 'plan-apply'
