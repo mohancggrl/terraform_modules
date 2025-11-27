@@ -1,0 +1,198 @@
+name: Terraform Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      aws_region:
+        description: "Enter AWS Region (e.g., us-west-2)"
+        required: true
+        type: string
+        default: "us-west-2"
+
+      action_type:
+        description: "Choose Terraform Action"
+        required: true
+        type: choice
+        options: ["plan-apply", "destroy"]
+        default: "plan-apply"
+
+      enable_vpc:
+        description: "Enable VPC"
+        required: true
+        type: choice
+        options: ["true", "false"]
+        default: "true"
+
+      enable_sg:
+        description: "Enable Security Group"
+        required: true
+        type: choice
+        options: ["true", "false"]
+        default: "false"
+
+      enable_jenkins:
+        description: "Enable Jenkins"
+        required: true
+        type: choice
+        options: ["true", "false"]
+        default: "false"
+
+      enable_agent:
+        description: "Enable Agent"
+        required: true
+        type: choice
+        options: ["true", "false"]
+        default: "false"
+
+      enable_sonar:
+        description: "Enable SonarQube"
+        required: true
+        type: choice
+        options: ["true", "false"]
+        default: "false"
+
+      enable_jfrog:
+        description: "Enable JFrog"
+        required: true
+        type: choice
+        options: ["true", "false"]
+        default: "false"
+
+      enable_vault:
+        description: "Enable Vault"
+        required: true
+        type: choice
+        options: ["true", "false"]
+        default: "false"
+
+      enable_normal:
+        description: "Enable Normal Deployment"
+        required: true
+        type: choice
+        options: ["true", "false"]
+        default: "false"
+
+      enable_role:
+        description: "Enable IAM Role"
+        required: true
+        type: choice
+        options: ["true", "false"]
+        default: "true"
+
+      enable_eks:
+        description: "Enable EKS"
+        required: true
+        type: choice
+        options: ["true", "false"]
+        default: "true"
+
+      enable_alb_iam_role:
+        description: "Enable ALB IAM Role"
+        required: true
+        type: choice
+        options: ["true", "false"]
+        default: "true"
+
+jobs:
+  terraform-plan:
+    if: github.event.inputs.action_type == 'plan-apply'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ github.event.inputs.aws_region }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: |
+          terraform plan \
+            -var="enable_vpc=${{ github.event.inputs.enable_vpc }}" \
+            -var="enable_sg=${{ github.event.inputs.enable_sg }}" \
+            -var="enable_jenkins=${{ github.event.inputs.enable_jenkins }}" \
+            -var="enable_agent=${{ github.event.inputs.enable_agent }}" \
+            -var="enable_sonar=${{ github.event.inputs.enable_sonar }}" \
+            -var="enable_jfrog=${{ github.event.inputs.enable_jfrog }}" \
+            -var="enable_vault=${{ github.event.inputs.enable_vault }}" \
+            -var="enable_normal=${{ github.event.inputs.enable_normal }}" \
+            -var="enable_role=${{ github.event.inputs.enable_role }}" \
+            -var="enable_eks=${{ github.event.inputs.enable_eks }}" \
+            -var="enable_alb_iam_role=${{ github.event.inputs.enable_alb_iam_role }}"
+
+  terraform-apply:    
+    if: github.event.inputs.action_type == 'plan-apply'
+    needs: terraform-plan
+    runs-on: ubuntu-latest
+    environment:
+      name: manual-approval
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Apply
+        run: |
+          terraform apply -auto-approve \
+            -var="enable_vpc=${{ github.event.inputs.enable_vpc }}" \
+            -var="enable_sg=${{ github.event.inputs.enable_sg }}" \
+            -var="enable_jenkins=${{ github.event.inputs.enable_jenkins }}" \
+            -var="enable_agent=${{ github.event.inputs.enable_agent }}" \
+            -var="enable_sonar=${{ github.event.inputs.enable_sonar }}" \
+            -var="enable_jfrog=${{ github.event.inputs.enable_jfrog }}" \
+            -var="enable_vault=${{ github.event.inputs.enable_vault }}" \
+            -var="enable_normal=${{ github.event.inputs.enable_normal }}" \
+            -var="enable_role=${{ github.event.inputs.enable_role }}" \
+            -var="enable_eks=${{ github.event.inputs.enable_eks }}" \
+            -var="enable_alb_iam_role=${{ github.event.inputs.enable_alb_iam_role }}"
+
+  terraform-destroy:
+    if: github.event.inputs.action_type == 'destroy'
+    runs-on: ubuntu-latest
+    environment:
+      name: manual-approval
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ github.event.inputs.aws_region }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Destroy
+        run: |
+          terraform destroy -auto-approve \
+            -var="enable_vpc=${{ github.event.inputs.enable_vpc }}" \
+            -var="enable_sg=${{ github.event.inputs.enable_sg }}" \
+            -var="enable_jenkins=${{ github.event.inputs.enable_jenkins }}" \
+            -var="enable_agent=${{ github.event.inputs.enable_agent }}" \
+            -var="enable_sonar=${{ github.event.inputs.enable_sonar }}" \
+            -var="enable_jfrog=${{ github.event.inputs.enable_jfrog }}" \
+            -var="enable_vault=${{ github.event.inputs.enable_vault }}" \
+            -var="enable_normal=${{ github.event.inputs.enable_normal }}" \
+            -var="enable_role=${{ github.event.inputs.enable_role }}" \
+            -var="enable_eks=${{ github.event.inputs.enable_eks }}" \
+            -var="enable_alb_iam_role=${{ github.event.inputs.enable_alb_iam_role }}"
