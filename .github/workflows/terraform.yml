@@ -15,6 +15,13 @@ on:
         type: string
         default: "naitkiterraformbackend"
 
+      environment_name:
+        description: "Select Environment"
+        required: true
+        type: choice
+        options: ["dev", "qa", "prod"]
+        default: "dev"
+
       action_type:
         description: "Choose Terraform Action"
         required: true
@@ -99,6 +106,7 @@ on:
         options: ["true", "false"]
         default: "true"
 
+
 jobs:
   terraform-plan:
     if: ${{ github.event.inputs.action_type == 'plan-apply' }}
@@ -122,7 +130,7 @@ jobs:
         run: |
           terraform init \
             -backend-config="bucket=${{ github.event.inputs.naitkiterraformbackend }}" \
-            -backend-config="key=${{ github.event.inputs.aws_region }}/terraform.tfstate" \
+            -backend-config="key=${{ github.event.inputs.environment_name }}/terraform.tfstate" \
             -backend-config="region=${{ github.event.inputs.aws_region }}" \
             -backend-config="encrypt=true"
 
@@ -141,12 +149,13 @@ jobs:
             -var="enable_eks=${{ github.event.inputs.enable_eks }}" \
             -var="enable_alb_iam_role=${{ github.event.inputs.enable_alb_iam_role }}" || true
 
+
   terraform-apply:
     if: ${{ github.event.inputs.action_type == 'plan-apply' }}
     needs: terraform-plan
     runs-on: ubuntu-latest
     environment:
-      name: dev  # Requires approval in GitHub Environments
+      name: ${{ github.event.inputs.environment_name }}
 
     steps:
       - name: Checkout Repo
@@ -166,7 +175,7 @@ jobs:
         run: |
           terraform init \
             -backend-config="bucket=${{ github.event.inputs.naitkiterraformbackend }}" \
-            -backend-config="key=${{ github.event.inputs.aws_region }}/terraform.tfstate" \
+            -backend-config="key=${{ github.event.inputs.environment_name }}/terraform.tfstate" \
             -backend-config="region=${{ github.event.inputs.aws_region }}" \
             -backend-config="encrypt=true"
 
@@ -185,11 +194,12 @@ jobs:
             -var="enable_eks=${{ github.event.inputs.enable_eks }}" \
             -var="enable_alb_iam_role=${{ github.event.inputs.enable_alb_iam_role }}"
 
+
   terraform-destroy:
     if: ${{ github.event.inputs.action_type == 'destroy' }}
     runs-on: ubuntu-latest
     environment:
-      name: dev  # Approval before destroy
+      name: ${{ github.event.inputs.environment_name }}
 
     steps:
       - name: Checkout Repo
@@ -209,7 +219,7 @@ jobs:
         run: |
           terraform init \
             -backend-config="bucket=${{ github.event.inputs.naitkiterraformbackend }}" \
-            -backend-config="key=${{ github.event.inputs.aws_region }}/terraform.tfstate" \
+            -backend-config="key=${{ github.event.inputs.environment_name }}/terraform.tfstate" \
             -backend-config="region=${{ github.event.inputs.aws_region }}" \
             -backend-config="encrypt=true"
 
