@@ -9,7 +9,7 @@ on:
         type: string
         default: "us-west-2"
 
-      naitkiterraformbackend:
+      backend:
         description: "Enter Terraform S3 Backend Bucket Name"
         required: true
         type: string
@@ -129,7 +129,7 @@ jobs:
       - name: Terraform Init
         run: |
           terraform init \
-            -backend-config="bucket=${{ github.event.inputs.naitkiterraformbackend }}" \
+            -backend-config="bucket=${{ github.event.inputs.backend }}" \
             -backend-config="key=${{ github.event.inputs.environment_name }}/terraform.tfstate" \
             -backend-config="region=${{ github.event.inputs.aws_region }}" \
             -backend-config="encrypt=true"
@@ -174,7 +174,7 @@ jobs:
       - name: Terraform Init
         run: |
           terraform init \
-            -backend-config="bucket=${{ github.event.inputs.naitkiterraformbackend }}" \
+            -backend-config="bucket=${{ github.event.inputs.backend }}" \
             -backend-config="key=${{ github.event.inputs.environment_name }}/terraform.tfstate" \
             -backend-config="region=${{ github.event.inputs.aws_region }}" \
             -backend-config="encrypt=true"
@@ -218,7 +218,7 @@ jobs:
       - name: Terraform Init
         run: |
           terraform init \
-            -backend-config="bucket=${{ github.event.inputs.naitkiterraformbackend }}" \
+            -backend-config="bucket=${{ github.event.inputs.backend }}" \
             -backend-config="key=${{ github.event.inputs.environment_name }}/terraform.tfstate" \
             -backend-config="region=${{ github.event.inputs.aws_region }}" \
             -backend-config="encrypt=true"
