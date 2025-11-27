@@ -13,7 +13,7 @@ on:
         description: "Enter Terraform S3 Backend Bucket Name"
         required: true
         type: string
-        default: "my-terraform-backend-bucket"
+        default: "naitkiterraformbackend"
 
       action_type:
         description: "Choose Terraform Action"
