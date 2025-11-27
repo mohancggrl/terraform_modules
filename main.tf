@@ -174,7 +174,7 @@ module "eks" {
 # }
 
 locals {
-  alb_role = {
+  alb_role = var.enable_alb_iam_role ? {
     alb_controller_role = {
       role_name            = var.alb_controller_role.role_name
       assume_oidc_provider = true
@@ -183,7 +183,7 @@ locals {
       managed_policy_arns  = var.alb_controller_role.managed_policy_arns
       inline_policy_json   = var.alb_controller_role.inline_policy_json
     }
-  }
+  } : {}
 }
 
 module "alb_iam_role" {
